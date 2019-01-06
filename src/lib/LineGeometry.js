@@ -8,9 +8,9 @@ import * as THREE from 'three'
 THREE.LineGeometry = function () {
   THREE.InstancedBufferGeometry.call(this)
 
-  const positions = [ -1, 2, 0, 1, 2, 0, -1, 1, 0, 1, 1, 0, -1, 0, 0, 1, 0, 0, -1, -1, 0, 1, -1, 0 ]
-  const uvs = [ -1, 2, 1, 2, -1, 1, 1, 1, -1, -1, 1, -1, -1, -2, 1, -2 ]
-  const index = [ 0, 2, 1, 2, 3, 1, 2, 4, 3, 4, 5, 3, 4, 6, 5, 6, 7, 5 ]
+  const positions = [ -1, 2, 0, 1, 2, 0, -1, 1, 0, 1, 1, 0, -1, 0, 0, 1, 0, 0 ]
+  const uvs = [ -1, 2, 1, 2, -1, 1, 1, 1, -1, 0, 1, 0 ]
+  const index = [ 0, 2, 1, 2, 3, 1, 2, 4, 3, 4, 5, 3 ]
 
   this.setIndex(index)
   this.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3))

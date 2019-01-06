@@ -7,6 +7,9 @@
 uniform float linewidth;
 uniform vec2 resolution;
 
+uniform float life;
+uniform float time;
+
 attribute vec3 instanceStart;
 attribute vec3 instanceEnd;
 
@@ -18,12 +21,7 @@ varying vec2 vUv;
 attribute float instanceDistanceStart;
 attribute float instanceDistanceEnd;
 
-#ifdef USE_DASH
-
-  uniform float dashScale;
-  varying float vLineDistance;
-
-#endif
+varying float vLineDistance;
 
 void trimSegment(const in vec4 start, inout vec4 end) {
 
@@ -45,12 +43,6 @@ void main() {
   #ifdef USE_COLOR
 
     vColor.xyz = (position.y < 0.5) ? instanceColorStart : instanceColorEnd;
-
-  #endif
-
-  #ifdef USE_DASH
-
-    vLineDistance = (position.y < 0.5) ? dashScale * instanceDistanceStart : dashScale * instanceDistanceEnd;
 
   #endif
 
@@ -117,11 +109,11 @@ void main() {
 
   // select end
   vec4 clip = (position.y < 0.5) ? clipStart : clipEnd;
-  float scale = (position.y < 0.5) ? instanceDistanceStart : instanceDistanceEnd;
+  vLineDistance = (position.y < 0.5) ? instanceDistanceStart : instanceDistanceEnd;
 
   // back to clip space
   offset *= clip.w;
-  offset *= scale / 30.0 + 0.1;
+  offset *= vLineDistance;
 
   clip.xy += offset;
 

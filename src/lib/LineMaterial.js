@@ -14,15 +14,12 @@
 
 import * as THREE from 'three'
 
-import lineVS from './line.vs'
-import lineFS from './line.fs'
+import lineVS from './line.glsl.vs'
+import lineFS from './line.glsl.fs'
 
 THREE.UniformsLib.line = {
   linewidth: { value: 1 },
-  resolution: { value: new THREE.Vector2(1, 1) },
-  dashScale: { value: 1 },
-  dashSize: { value: 1 },
-  gapSize: { value: 1 } // todo FIX - maybe change to totalSize
+  resolution: { value: new THREE.Vector2(1, 1) }
 }
 
 THREE.ShaderLib['line'] = {
@@ -60,33 +57,6 @@ THREE.LineMaterial = function (parameters) {
       },
       set: function (value) {
         this.uniforms.linewidth.value = value
-      }
-    },
-    dashScale: {
-      enumerable: true,
-      get: function () {
-        return this.uniforms.dashScale.value
-      },
-      set: function (value) {
-        this.uniforms.dashScale.value = value
-      }
-    },
-    dashSize: {
-      enumerable: true,
-      get: function () {
-        return this.uniforms.dashSize.value
-      },
-      set: function (value) {
-        this.uniforms.dashSize.value = value
-      }
-    },
-    gapSize: {
-      enumerable: true,
-      get: function () {
-        return this.uniforms.gapSize.value
-      },
-      set: function (value) {
-        this.uniforms.gapSize.value = value
       }
     },
     resolution: {

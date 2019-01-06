@@ -23,17 +23,21 @@ THREE.Line2.prototype = Object.assign(Object.create(THREE.Mesh.prototype), {
 
     var instanceStart = geometry.attributes.instanceStart
     var instanceEnd = geometry.attributes.instanceEnd
-    var lineDistances = new Float32Array(2 * instanceStart.data.count)
 
-    for (var i = 0, j = 0, l = instanceStart.data.count; i < l; i++, j += 2) {
+    const l = instanceStart.data.count
+    const lineDistances = new Float32Array(2 * l)
+
+    for (let i = 0, j = 0; i < l; i++, j += 2) {
       start.fromBufferAttribute(instanceStart, i)
       end.fromBufferAttribute(instanceEnd, i)
 
       lineDistances[ j ] = (j === 0) ? 0 : lineDistances[ j - 1 ]
       lineDistances[ j + 1 ] = lineDistances[ j ] + start.distanceTo(end)
     }
+    const totalDistance = lineDistances[2 * l - 1] || 1
+    const relativeDistances = lineDistances.map(dis => dis / totalDistance)
 
-    var instanceDistanceBuffer = new THREE.InstancedInterleavedBuffer(lineDistances, 2, 1) // d0, d1
+    var instanceDistanceBuffer = new THREE.InstancedInterleavedBuffer(relativeDistances, 2, 1) // d0, d1
 
     geometry.addAttribute('instanceDistanceStart', new THREE.InterleavedBufferAttribute(instanceDistanceBuffer, 1, 0)) // d0
     geometry.addAttribute('instanceDistanceEnd', new THREE.InterleavedBufferAttribute(instanceDistanceBuffer, 1, 1)) // d1

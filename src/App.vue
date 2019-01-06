@@ -11,8 +11,13 @@ import './lib/LineGeometry'
 import './lib/LineMaterial'
 import './lib/Line'
 
-const renderer = new THREE.WebGLRenderer({ antialias: true })
+const renderer = new THREE.WebGLRenderer({
+  alpha: true,
+  premultipliedAlpha: false,
+  antialias: true
+})
 renderer.setSize(innerWidth, innerHeight)
+
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 1000)
 camera.position.set(0, -50, 50)
@@ -23,16 +28,16 @@ window.THREE = THREE
 const color = new THREE.Color()
 const colors = []
 for (let i = 0; i < 18; i++) {
-  color.setHSL(0.81, 1.0, Math.pow(1.4, i - 18))
+  color.setHSL(0.81, 1.0, 0.5)
   colors.push(color.r, color.g, color.b)
 }
 const geometry = new THREE.LineGeometry()
 geometry.setColors(colors)
 const material = new THREE.LineMaterial({
+  // blending: THREE.AdditiveBlending,
   color: 0xffffff,
-  linewidth: 6,
-  vertexColors: THREE.VertexColors,
-  dashed: false
+  linewidth: 4,
+  vertexColors: THREE.VertexColors
 })
 const line = new THREE.Line2(geometry, material)
 
@@ -117,6 +122,7 @@ body
   -moz-osx-font-smoothing grayscale
   text-align center
   color #2c3e50
+  background-color #000
 canvas
   display block
 </style>
