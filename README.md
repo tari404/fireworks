@@ -1,4 +1,4 @@
-# empty-vue-proj
+# Fireworks
 
 ## Project setup
 ```

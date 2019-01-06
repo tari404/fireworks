@@ -1,25 +1,122 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
   </div>
 </template>
+
+<script>
+import * as THREE from 'three'
+import OrbitControls from 'three-orbitcontrols'
+
+import './lib/LineGeometry'
+import './lib/LineMaterial'
+import './lib/Line'
+
+const renderer = new THREE.WebGLRenderer({ antialias: true })
+renderer.setSize(innerWidth, innerHeight)
+const scene = new THREE.Scene()
+const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 1000)
+camera.position.set(0, -50, 50)
+camera.lookAt(0, 0, 0)
+
+window.THREE = THREE
+
+const color = new THREE.Color()
+const colors = []
+for (let i = 0; i < 18; i++) {
+  color.setHSL(0.81, 1.0, Math.pow(1.4, i - 18))
+  colors.push(color.r, color.g, color.b)
+}
+const geometry = new THREE.LineGeometry()
+geometry.setColors(colors)
+const material = new THREE.LineMaterial({
+  color: 0xffffff,
+  linewidth: 6,
+  vertexColors: THREE.VertexColors,
+  dashed: false
+})
+const line = new THREE.Line2(geometry, material)
+
+// const positions = []
+// const dire = new THREE.Vector3(Math.random() - 1, Math.random() - 1, Math.random() - 1)
+// for (let j = 0; j < 20; j++) {
+//   positions.push(
+//     dire.x * j,
+//     dire.y * j,
+//     dire.z * j
+//   )
+// }
+// line.geometry.setPositions(positions)
+// line.computeLineDistances()
+// scene.add(line)
+
+const raysCount = 200
+for (let i = 0; i < raysCount; i++) {
+  const positions = []
+  const dir = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize()
+  const speed = Math.random() * 0.5 + 0.5
+  for (let j = 0; j < 18; j++) {
+    positions.push(
+      dir.x * j * speed,
+      6 + dir.y * j * speed - j * j / 60,
+      dir.z * j * speed
+    )
+  }
+  const lineCopy = line.clone()
+  lineCopy.geometry.setPositions(positions)
+  lineCopy.geometry.setColors(colors)
+  lineCopy.computeLineDistances()
+  scene.add(lineCopy)
+}
+
+// const axesHelper = new THREE.AxesHelper(1)
+// scene.add(axesHelper)
+
+// const dir = new THREE.Vector3(1, 2, 0)
+// dir.normalize()
+// const origin = new THREE.Vector3(0, 0, 0)
+// const length = 1
+// const hex = 0xffff00
+// const arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex)
+// scene.add(arrowHelper)
+
+export default {
+  name: 'App',
+  mounted () {
+    window.addEventListener('resize', this.onresize)
+    this.$el.appendChild(renderer.domElement)
+    // const controls = new OrbitControls(camera, renderer.domElement)
+    // controls.update()
+    requestAnimationFrame(this.render)
+  },
+  methods: {
+    onresize () {
+      renderer.setSize(innerWidth, innerHeight)
+      camera.aspect = innerWidth / innerHeight
+      camera.updateProjectionMatrix()
+    },
+    render (time) {
+      material.resolution.set(innerWidth, innerHeight)
+      camera.position.set(Math.sin(time / 5000) * 50, -50, Math.cos(time / 5000) * 50)
+      camera.lookAt(0, 0, 0)
+      renderer.render(scene, camera)
+      requestAnimationFrame(this.render)
+    }
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.onresize)
+  }
+}
+</script>
+
 <style lang="stylus">
+body
+  margin 0
 #app
   font-family 'Avenir', Helvetica, Arial, sans-serif
   -webkit-font-smoothing antialiased
   -moz-osx-font-smoothing grayscale
   text-align center
   color #2c3e50
-
-#nav
-  padding 30px
-  a
-    font-weight bold
-    color #2c3e50
-    &.router-link-exact-active
-      color #42b983
+canvas
+  display block
 </style>
