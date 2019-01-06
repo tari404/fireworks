@@ -5,25 +5,42 @@
 
 <script>
 import * as THREE from 'three'
-import OrbitControls from 'three-orbitcontrols'
+import { CopyMaterial, ShaderPass, EffectComposer, RenderPass } from 'postprocessing'
+// import OrbitControls from 'three-orbitcontrols'
 
 import './lib/LineGeometry'
 import './lib/LineMaterial'
 import './lib/Line'
 
+window.THREE = THREE
+
+let raf = 0
+
 const renderer = new THREE.WebGLRenderer({
   alpha: true,
-  premultipliedAlpha: false,
   antialias: true
 })
 renderer.setSize(innerWidth, innerHeight)
+renderer.setPixelRatio(window.devicePixelRatio)
+
+window.renderer = renderer
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 1000)
 camera.position.set(0, -50, 50)
 camera.lookAt(0, 0, 0)
 
-window.THREE = THREE
+const composer = new EffectComposer(renderer)
+
+const copyMaterial = new CopyMaterial()
+copyMaterial.blending = THREE.AdditiveBlending
+const copyPass = new ShaderPass(copyMaterial)
+copyPass.renderToScreen = true
+
+const renderPass = new RenderPass(scene, camera)
+
+composer.addPass(renderPass)
+composer.addPass(copyPass)
 
 const color = new THREE.Color()
 const colors = []
@@ -93,7 +110,7 @@ export default {
     this.$el.appendChild(renderer.domElement)
     // const controls = new OrbitControls(camera, renderer.domElement)
     // controls.update()
-    requestAnimationFrame(this.render)
+    raf = requestAnimationFrame(this.render)
   },
   methods: {
     onresize () {
@@ -106,11 +123,13 @@ export default {
       material.sqrtLifeTime = Math.sqrt(time % 2000 / 1500)
       camera.position.set(Math.sin(time / 5000) * 50, -50, Math.cos(time / 5000) * 50)
       camera.lookAt(0, 0, 0)
-      renderer.render(scene, camera)
-      requestAnimationFrame(this.render)
+      // renderer.render(scene, camera)
+      composer.render(time)
+      raf = requestAnimationFrame(this.render)
     }
   },
   beforeDestroy () {
+    cancelAnimationFrame(raf)
     window.removeEventListener('resize', this.onresize)
   }
 }
@@ -125,7 +144,7 @@ body
   -moz-osx-font-smoothing grayscale
   text-align center
   color #2c3e50
-  background-color #000
 canvas
   display block
+  background-color #000
 </style>
