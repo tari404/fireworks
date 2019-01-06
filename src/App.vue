@@ -103,6 +103,15 @@ for (let i = 0; i < raysCount; i++) {
 // const arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex)
 // scene.add(arrowHelper)
 
+let resizeReduction = 0
+function resize () {
+  renderer.setPixelRatio(window.devicePixelRatio)
+  renderer.setSize(innerWidth, innerHeight)
+  composer.setSize(innerWidth, innerHeight)
+  camera.aspect = innerWidth / innerHeight
+  camera.updateProjectionMatrix()
+}
+
 export default {
   name: 'App',
   mounted () {
@@ -114,9 +123,8 @@ export default {
   },
   methods: {
     onresize () {
-      renderer.setSize(innerWidth, innerHeight)
-      camera.aspect = innerWidth / innerHeight
-      camera.updateProjectionMatrix()
+      clearTimeout(resizeReduction)
+      resizeReduction = setTimeout(resize, 200)
     },
     render (time) {
       material.resolution.set(innerWidth, innerHeight)
@@ -138,6 +146,7 @@ export default {
 <style lang="stylus">
 body
   margin 0
+  background-color #000
 #app
   font-family 'Avenir', Helvetica, Arial, sans-serif
   -webkit-font-smoothing antialiased
@@ -146,5 +155,4 @@ body
   color #2c3e50
 canvas
   display block
-  background-color #000
 </style>
