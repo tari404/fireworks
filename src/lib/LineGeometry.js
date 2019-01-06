@@ -18,11 +18,14 @@ export default class LineGeometry extends THREE.InstancedBufferGeometry {
     this.addAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
 
     this.type = 'LineGeometry'
+    this.positionsArray = []
+    this.colorsArray = []
   }
 
   static isLineGeometry = true
 
   setPositions (array) {
+    this.positionsArray = array
     // converts [ x1, y1, z1,  x2, y2, z2, ... ] to pairs format
     var length = array.length - 3
     var points = new Float32Array(2 * length)
@@ -48,6 +51,7 @@ export default class LineGeometry extends THREE.InstancedBufferGeometry {
   }
 
   setColors (array) {
+    this.colorsArray = array
     // converts [ r1, g1, b1,  r2, g2, b2, ... ] to pairs format
     var length = array.length - 3
     var colors = new Float32Array(2 * length)
@@ -188,7 +192,15 @@ export default class LineGeometry extends THREE.InstancedBufferGeometry {
   }
 
   clone () {
-    return new this.constructor()
+    const other = new this.constructor()
+    if (this.positionsArray.length) {
+      console.log(this.positionsArray)
+      other.setPositions(this.positionsArray)
+    }
+    if (this.colorsArray.length) {
+      other.setColors(this.colorsArray)
+    }
+    return other
   }
 
   copy (source) {

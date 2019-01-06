@@ -42,17 +42,22 @@ const renderPass = new RenderPass(scene, camera)
 composer.addPass(renderPass)
 composer.addPass(copyPass)
 
-const color = new THREE.Color()
-const colors = []
-for (let i = 0; i < 18; i++) {
-  color.setHSL(0.81, 1.0, 0.5)
-  colors.push(color.r, color.g, color.b)
-}
 const geometry = new LineGeometry()
-geometry.setColors(colors)
+
+function updateColor (geometry, h) {
+  const color = new THREE.Color()
+  color.setHSL(h, 1.0, 1.0) // Temporarily only use material color
+  const colors = []
+  for (let i = 0; i < 18; i++) {
+    colors.push(color.r, color.g, color.b)
+  }
+  geometry.setColors(colors)
+}
+updateColor(geometry, 0.81)
+
 const material = new LineMaterial({
   // blending: THREE.AdditiveBlending,
-  color: 0xffffff,
+  color: 0xd900ff,
   width: 4,
   vertexColors: THREE.VertexColors
 })
@@ -87,7 +92,6 @@ for (let i = 0; i < raysCount; i++) {
   }
   const lineCopy = line.clone()
   lineCopy.geometry.setPositions(positions)
-  lineCopy.geometry.setColors(colors)
   lineCopy.computeLineDistances()
   scene.add(lineCopy)
 }
@@ -112,6 +116,8 @@ function resize () {
   camera.updateProjectionMatrix()
 }
 
+let colorLock = false
+
 export default {
   name: 'App',
   mounted () {
@@ -129,7 +135,15 @@ export default {
     render (time) {
       material.resolution.set(innerWidth, innerHeight)
       material.sqrtLifeTime = Math.sqrt(time % 2000 / 1500)
-      camera.position.set(Math.sin(time / 5000) * 50, -50, Math.cos(time / 5000) * 50)
+      if (time % 2000 > 1700 && !colorLock) {
+        colorLock = true
+        material.color = new THREE.Color().setHSL(Math.random(), 1, 0.6)
+      }
+      if (time % 2000 < 500 && colorLock) {
+        colorLock = false
+      }
+      // material.color = new THREE.Color(Math.random() * 0xffffff)
+      camera.position.set(Math.sin(time / 6000) * 50, -50, Math.cos(time / 6000) * 50)
       camera.lookAt(0, 0, 0)
       // renderer.render(scene, camera)
       composer.render(time)
