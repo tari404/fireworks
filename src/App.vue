@@ -41,6 +41,8 @@ const material = new THREE.LineMaterial({
 })
 const line = new THREE.Line2(geometry, material)
 
+window.material = material
+
 // const positions = []
 // const dire = new THREE.Vector3(Math.random() - 1, Math.random() - 1, Math.random() - 1)
 // for (let j = 0; j < 20; j++) {
@@ -58,11 +60,11 @@ const raysCount = 200
 for (let i = 0; i < raysCount; i++) {
   const positions = []
   const dir = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize()
-  const speed = Math.random() * 0.5 + 0.5
+  const speed = Math.random() * 0.7 + 0.5
   for (let j = 0; j < 18; j++) {
     positions.push(
       dir.x * j * speed,
-      6 + dir.y * j * speed - j * j / 60,
+      6 + dir.y * j * speed - j * j / 50,
       dir.z * j * speed
     )
   }
@@ -101,6 +103,7 @@ export default {
     },
     render (time) {
       material.resolution.set(innerWidth, innerHeight)
+      material.sqrtLifeTime = Math.sqrt(time % 2000 / 1500)
       camera.position.set(Math.sin(time / 5000) * 50, -50, Math.cos(time / 5000) * 50)
       camera.lookAt(0, 0, 0)
       renderer.render(scene, camera)

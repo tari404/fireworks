@@ -7,9 +7,6 @@
 uniform float linewidth;
 uniform vec2 resolution;
 
-uniform float life;
-uniform float time;
-
 attribute vec3 instanceStart;
 attribute vec3 instanceEnd;
 
@@ -20,7 +17,6 @@ varying vec2 vUv;
 
 attribute float instanceDistanceStart;
 attribute float instanceDistanceEnd;
-
 varying float vLineDistance;
 
 void trimSegment(const in vec4 start, inout vec4 end) {

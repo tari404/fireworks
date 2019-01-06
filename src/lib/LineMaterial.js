@@ -19,7 +19,8 @@ import lineFS from './line.glsl.fs'
 
 THREE.UniformsLib.line = {
   linewidth: { value: 1 },
-  resolution: { value: new THREE.Vector2(1, 1) }
+  resolution: { value: new THREE.Vector2(1, 1) },
+  uSqrtLifeTime: { value: 0 }
 }
 
 THREE.ShaderLib['line'] = {
@@ -66,6 +67,15 @@ THREE.LineMaterial = function (parameters) {
       },
       set: function (value) {
         this.uniforms.resolution.value.copy(value)
+      }
+    },
+    sqrtLifeTime: {
+      enumerable: true,
+      get: function () {
+        return this.uniforms.uSqrtLifeTime.value
+      },
+      set: function (value) {
+        this.uniforms.uSqrtLifeTime.value = value
       }
     }
   })

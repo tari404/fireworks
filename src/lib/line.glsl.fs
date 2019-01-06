@@ -1,5 +1,7 @@
 uniform vec3 diffuse;
-uniform float opacity;
+// uniform float opacity;
+
+uniform float uSqrtLifeTime;
 
 varying float vLineDistance;
 
@@ -15,17 +17,22 @@ void main() {
 
   #include <clipping_planes_fragment>
 
-  if (vUv.y > 1.0) {
+  if (uSqrtLifeTime < vLineDistance) {
+    discard;
+  }
 
+  if (vUv.y > 1.0) {
     float a = vUv.x;
     float b = vUv.y - 1.0;
     float len2 = a * a + b * b;
 
     if (len2 > 1.0) discard;
-
   }
 
-  vec4 diffuseColor = vec4(diffuse, vLineDistance * vLineDistance);
+  float attenuation = uSqrtLifeTime - vLineDistance;
+  float opacity = 2.5 * (1.0 - attenuation / uSqrtLifeTime) * (1.0 - uSqrtLifeTime);
+
+  vec4 diffuseColor = vec4(diffuse, opacity);
 
   #include <logdepthbuf_fragment>
   #include <color_fragment>
