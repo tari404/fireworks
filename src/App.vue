@@ -8,9 +8,9 @@ import * as THREE from 'three'
 import { CopyMaterial, ShaderPass, EffectComposer, RenderPass } from 'postprocessing'
 // import OrbitControls from 'three-orbitcontrols'
 
-import './lib/LineGeometry'
-import './lib/LineMaterial'
-import './lib/Line'
+import LineGeometry from './lib/LineGeometry'
+import LineMaterial from './lib/LineMaterial'
+import Line2 from './lib/Line'
 
 window.THREE = THREE
 
@@ -48,15 +48,15 @@ for (let i = 0; i < 18; i++) {
   color.setHSL(0.81, 1.0, 0.5)
   colors.push(color.r, color.g, color.b)
 }
-const geometry = new THREE.LineGeometry()
+const geometry = new LineGeometry()
 geometry.setColors(colors)
-const material = new THREE.LineMaterial({
+const material = new LineMaterial({
   // blending: THREE.AdditiveBlending,
   color: 0xffffff,
-  linewidth: 4,
+  width: 4,
   vertexColors: THREE.VertexColors
 })
-const line = new THREE.Line2(geometry, material)
+const line = new Line2(geometry, material)
 
 window.material = material
 

@@ -4,7 +4,7 @@
 #include <logdepthbuf_pars_vertex>
 #include <clipping_planes_pars_vertex>
 
-uniform float linewidth;
+uniform float width;
 uniform vec2 resolution;
 
 attribute vec3 instanceStart;
@@ -97,8 +97,8 @@ void main() {
     offset += dir;
   }
 
-  // adjust for linewidth
-  offset *= linewidth;
+  // adjust for width
+  offset *= width;
 
   // adjust for clip-space to screen-space conversion // maybe resolution should be based on viewport ...
   offset /= resolution.y;

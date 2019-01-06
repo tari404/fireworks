@@ -5,24 +5,24 @@
 
 import * as THREE from 'three'
 
-THREE.LineGeometry = function () {
-  THREE.InstancedBufferGeometry.call(this)
+export default class LineGeometry extends THREE.InstancedBufferGeometry {
+  constructor () {
+    super()
 
-  const positions = [ -1, 2, 0, 1, 2, 0, -1, 1, 0, 1, 1, 0, -1, 0, 0, 1, 0, 0 ]
-  const uvs = [ -1, 2, 1, 2, -1, 1, 1, 1, -1, 0, 1, 0 ]
-  const index = [ 0, 2, 1, 2, 3, 1, 2, 4, 3, 4, 5, 3 ]
+    const positions = [ -1, 2, 0, 1, 2, 0, -1, 1, 0, 1, 1, 0, -1, 0, 0, 1, 0, 0 ]
+    const uvs = [ -1, 2, 1, 2, -1, 1, 1, 1, -1, 0, 1, 0 ]
+    const index = [ 0, 2, 1, 2, 3, 1, 2, 4, 3, 4, 5, 3 ]
 
-  this.setIndex(index)
-  this.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
-  this.addAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
+    this.setIndex(index)
+    this.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+    this.addAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
 
-  this.type = 'LineGeometry'
-}
+    this.type = 'LineGeometry'
+  }
 
-THREE.LineGeometry.prototype = Object.assign(Object.create(THREE.InstancedBufferGeometry.prototype), {
-  constructor: THREE.LineGeometry,
-  isLineGeometry: true,
-  setPositions: function (array) {
+  static isLineGeometry = true
+
+  setPositions (array) {
     // converts [ x1, y1, z1,  x2, y2, z2, ... ] to pairs format
     var length = array.length - 3
     var points = new Float32Array(2 * length)
@@ -45,9 +45,9 @@ THREE.LineGeometry.prototype = Object.assign(Object.create(THREE.InstancedBuffer
     this.computeBoundingSphere()
 
     return this
-  },
+  }
 
-  setColors: function (array) {
+  setColors (array) {
     // converts [ r1, g1, b1,  r2, g2, b2, ... ] to pairs format
     var length = array.length - 3
     var colors = new Float32Array(2 * length)
@@ -67,9 +67,9 @@ THREE.LineGeometry.prototype = Object.assign(Object.create(THREE.InstancedBuffer
     this.addAttribute('instanceColorEnd', new THREE.InterleavedBufferAttribute(instanceColorBuffer, 3, 3)) // rgb
 
     return this
-  },
+  }
 
-  fromLine: function (line) {
+  fromLine (line) {
     var geometry = line.geometry
 
     if (geometry.isGeometry) {
@@ -79,8 +79,9 @@ THREE.LineGeometry.prototype = Object.assign(Object.create(THREE.InstancedBuffer
     }
     // set colors, maybe
     return this
-  },
-  applyMatrix: function (matrix) {
+  }
+
+  applyMatrix (matrix) {
     var start = this.attributes.instanceStart
     var end = this.attributes.instanceEnd
 
@@ -101,25 +102,25 @@ THREE.LineGeometry.prototype = Object.assign(Object.create(THREE.InstancedBuffer
     }
 
     return this
-  },
+  }
 
-  fromWireframeGeometry: function (geometry) {
+  fromWireframeGeometry (geometry) {
     this.setPositions(geometry.attributes.position.array)
     return this
-  },
+  }
 
-  fromEdgesGeometry: function (geometry) {
+  fromEdgesGeometry (geometry) {
     this.setPositions(geometry.attributes.position.array)
     return this
-  },
+  }
 
-  fromMesh: function (mesh) {
+  fromMesh (mesh) {
     this.fromWireframeGeometry(new THREE.WireframeGeometry(mesh.geometry))
     // set colors, maybe
     return this
-  },
+  }
 
-  fromLineSegements: function (lineSegments) {
+  fromLineSegements (lineSegments) {
     var geometry = lineSegments.geometry
 
     if (geometry.isGeometry) {
@@ -129,9 +130,9 @@ THREE.LineGeometry.prototype = Object.assign(Object.create(THREE.InstancedBuffer
     }
     // set colors, maybe
     return this
-  },
+  }
 
-  computeBoundingBox: function () {
+  computeBoundingBox () {
     const box = new THREE.Box3()
     if (this.boundingBox === null) {
       this.boundingBox = new THREE.Box3()
@@ -143,8 +144,9 @@ THREE.LineGeometry.prototype = Object.assign(Object.create(THREE.InstancedBuffer
       box.setFromBufferAttribute(end)
       this.boundingBox.union(box)
     }
-  },
-  computeBoundingSphere: function () {
+  }
+
+  computeBoundingSphere () {
     if (this.boundingSphere === null) {
       this.boundingSphere = new THREE.Sphere()
     }
@@ -176,21 +178,21 @@ THREE.LineGeometry.prototype = Object.assign(Object.create(THREE.InstancedBuffer
       this.boundingSphere.radius = Math.sqrt(maxRadiusSq)
 
       if (isNaN(this.boundingSphere.radius)) {
-        console.error('THREE.LineGeometry.computeBoundingSphere(): Computed radius is NaN. The instanced position data is likely to have NaN values.', this)
+        console.error('LineGeometry.computeBoundingSphere(): Computed radius is NaN. The instanced position data is likely to have NaN values.', this)
       }
     }
-  },
+  }
 
-  toJSON: function () {
+  toJSON () {
     // todo
-  },
+  }
 
-  clone: function () {
+  clone () {
     return new this.constructor()
-  },
+  }
 
-  copy: function (source) {
+  copy (source) {
     // todo
     return this
   }
-})
+}

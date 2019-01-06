@@ -4,18 +4,21 @@
  */
 
 import * as THREE from 'three'
+import LineGeometry from './LineGeometry'
+import LineMaterial from './LineMaterial'
 
-THREE.Line2 = function (geometry, material) {
-  THREE.Mesh.call(this)
-  this.type = 'Line2'
-  this.geometry = geometry !== undefined ? geometry : new THREE.LineGeometry()
-  this.material = material !== undefined ? material : new THREE.LineMaterial({ color: Math.random() * 0xffffff })
-}
+export default class Line2 extends THREE.Mesh {
+  constructor (geometry, material) {
+    super()
 
-THREE.Line2.prototype = Object.assign(Object.create(THREE.Mesh.prototype), {
-  constructor: THREE.Line2,
-  isLine2: true,
-  computeLineDistances: function () {
+    this.type = 'Line2'
+    this.geometry = geometry !== undefined ? geometry : new LineGeometry()
+    this.material = material !== undefined ? material : new LineMaterial({ color: Math.random() * 0xffffff })
+  }
+
+  static isLine2 = true
+
+  computeLineDistances () {
     const start = new THREE.Vector3()
     const end = new THREE.Vector3()
 
@@ -43,12 +46,14 @@ THREE.Line2.prototype = Object.assign(Object.create(THREE.Mesh.prototype), {
     geometry.addAttribute('instanceDistanceEnd', new THREE.InterleavedBufferAttribute(instanceDistanceBuffer, 1, 1)) // d1
 
     return this
-  },
-  clone: function () {
+  }
+
+  clone () {
     return new this.constructor(this.geometry.clone(), this.material).copy(this)
-  },
-  copy: function (source) {
+  }
+
+  copy (source) {
     THREE.Mesh.prototype.copy.call(this, source)
     return this
   }
-})
+}
