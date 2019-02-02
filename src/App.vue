@@ -13,6 +13,7 @@ import LineMaterial from './lib/LineMaterial'
 import Line2 from './lib/Line'
 
 window.THREE = THREE
+const deg = Math.PI / 180
 
 let raf = 0
 
@@ -27,8 +28,8 @@ window.renderer = renderer
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 1000)
-camera.position.set(0, -50, 50)
-camera.lookAt(0, 0, 0)
+camera.position.set(0, 2, 0)
+camera.lookAt(1, 0, 0)
 
 const composer = new EffectComposer(renderer)
 
@@ -78,22 +79,27 @@ window.material = material
 // line.computeLineDistances()
 // scene.add(line)
 
-const raysCount = 200
-for (let i = 0; i < raysCount; i++) {
-  const positions = []
-  const dir = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize()
-  const speed = Math.random() * 0.7 + 0.5
-  for (let j = 0; j < 18; j++) {
-    positions.push(
-      dir.x * j * speed,
-      6 + dir.y * j * speed - j * j / 50,
-      dir.z * j * speed
-    )
+const raysCount = 60
+for (let k = 0; k < 20; k++) {
+  const r = Math.random() * Math.PI * 2
+  const x = Math.sin(r) * 100
+  const z = Math.cos(r) * 100
+  for (let i = 0; i < raysCount; i++) {
+    const positions = []
+    const dir = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize()
+    const speed = Math.random() * 0.7 + 0.5
+    for (let j = 0; j < 18; j++) {
+      positions.push(
+        x + dir.x * j * speed,
+        30 + dir.y * j * speed - j * j / 50,
+        z + dir.z * j * speed
+      )
+    }
+    const lineCopy = line.clone()
+    lineCopy.geometry.setPositions(positions)
+    lineCopy.computeLineDistances()
+    scene.add(lineCopy)
   }
-  const lineCopy = line.clone()
-  lineCopy.geometry.setPositions(positions)
-  lineCopy.computeLineDistances()
-  scene.add(lineCopy)
 }
 
 // const axesHelper = new THREE.AxesHelper(1)
@@ -106,6 +112,12 @@ for (let i = 0; i < raysCount; i++) {
 // const hex = 0xffff00
 // const arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex)
 // scene.add(arrowHelper)
+
+const planeGeometry = new THREE.CircleGeometry(10, 32)
+const planeMateral = new THREE.MeshBasicMaterial({ color: 0xffffff })
+const plane = new THREE.Mesh(planeGeometry, planeMateral)
+plane.rotation.set(-Math.PI / 2, 0, 0)
+scene.add(plane)
 
 let resizeReduction = 0
 function resize () {
@@ -120,7 +132,14 @@ let colorLock = false
 
 export default {
   name: 'App',
+  data () {
+    return {
+      alpha: 0,
+      beta: 90
+    }
+  },
   mounted () {
+    window.addEventListener('deviceorientation', this.orient)
     window.addEventListener('resize', this.onresize)
     this.$el.appendChild(renderer.domElement)
     // const controls = new OrbitControls(camera, renderer.domElement)
@@ -132,19 +151,30 @@ export default {
       clearTimeout(resizeReduction)
       resizeReduction = setTimeout(resize, 200)
     },
+    orient (e) {
+      this.alpha = e.alpha
+      this.beta = e.beta
+    },
     render (time) {
       material.resolution.set(innerWidth, innerHeight)
-      material.sqrtLifeTime = Math.sqrt(time % 2000 / 1500)
+      material.sqrtLifeTime = 0.7
+      // material.sqrtLifeTime = Math.sqrt(time % 2000 / 1500)
       if (time % 2000 > 1700 && !colorLock) {
         colorLock = true
-        material.color = new THREE.Color().setHSL(Math.random(), 1, 0.6)
+        // material.color = new THREE.Color().setHSL(Math.random(), 1, 0.6)
       }
       if (time % 2000 < 500 && colorLock) {
         colorLock = false
       }
       // material.color = new THREE.Color(Math.random() * 0xffffff)
-      camera.position.set(Math.sin(time / 6000) * 50, -50, Math.cos(time / 6000) * 50)
-      camera.lookAt(0, 0, 0)
+      // camera.position.set(Math.sin(time / 6000) * 80, 2, Math.cos(time / 6000) * 80)
+      const y = -Math.cos(this.beta * deg) * 100
+      const xz = Math.sin(this.beta * deg) * 100
+      const x = Math.cos(this.alpha * deg) * xz
+      const z = -Math.sin(this.alpha * deg) * xz
+      camera.position.set(0, 2, 0)
+      camera.lookAt(x, y, z)
+      // camera.lookAt(80, 24, 0)
       // renderer.render(scene, camera)
       composer.render(time)
       raf = requestAnimationFrame(this.render)
@@ -152,6 +182,7 @@ export default {
   },
   beforeDestroy () {
     cancelAnimationFrame(raf)
+    window.removeEventListener('deviceorientation', this.orient)
     window.removeEventListener('resize', this.onresize)
   }
 }
