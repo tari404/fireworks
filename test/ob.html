@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Observer</title>
+  <style>
+    .info {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-family: monospace;
+    }
+    .f {
+      width: 180px;
+      height: 300px;
+      position: absolute;
+      top: calc(50% - 150px);
+      left: calc(50% - 90px);
+      color: #fff;
+      transform-style: preserve-3d;
+      perspective: 900px;
+    }
+    .simulation {
+      width: 100%;
+      height: 100%;
+      background-color: rgb(231, 73, 34);
+      transform: rotateX(90deg) rotateZ(0deg) rotateX(0deg) rotateY(0deg);
+    }
+  </style>
+</head>
+<body>
+  <div class="info">
+    <div>alpha:<span id="alpha"></span></div>
+    <div>beta :<span id="beta"></span></div>
+    <div>gamma:<span id="gamma"></span></div>
+  </div>
+  <div class="f">
+    <div class="simulation">
+      测试
+    </div>
+  </div>
+</body>
+<script>
+const alphaDom = document.querySelector('#alpha')
+const betaDom = document.querySelector('#beta')
+const gammaDom = document.querySelector('#gamma')
+const simulation = document.querySelector('.simulation')
+let alpha = 0
+let beta = 0
+let gamma = 0
+
+const ws = new WebSocket('ws://192.168.46.3:9000')
+ws.onmessage = msg => {
+  const data = msg.data.split(',').map(datum => {
+    return Number(datum)
+  })
+  for (datum of data) {
+    if (isNaN(datum)) {
+      return
+    }
+  }
+  alpha = data[0]
+  beta = data[1]
+  gamma = data[2]
+}
+
+function render () {
+  alphaDom.innerHTML = alpha.toFixed(0)
+  betaDom.innerHTML = beta.toFixed(0)
+  gammaDom.innerHTML = gamma.toFixed(0)
+  simulation.style.transform = `rotateX(90deg) rotateZ(${-alpha}deg) rotateX(${-beta}deg) rotateY(${gamma}deg)`
+  requestAnimationFrame(render)
+}
+requestAnimationFrame(render)
+</script>
+</html>

@@ -102,8 +102,8 @@ for (let k = 0; k < 20; k++) {
   }
 }
 
-// const axesHelper = new THREE.AxesHelper(1)
-// scene.add(axesHelper)
+const axesHelper = new THREE.AxesHelper(1)
+scene.add(axesHelper)
 
 // const dir = new THREE.Vector3(1, 2, 0)
 // dir.normalize()
@@ -117,7 +117,18 @@ const planeGeometry = new THREE.CircleGeometry(10, 32)
 const planeMateral = new THREE.MeshBasicMaterial({ color: 0xffffff })
 const plane = new THREE.Mesh(planeGeometry, planeMateral)
 plane.rotation.set(-Math.PI / 2, 0, 0)
+plane.position.setY(-2)
 scene.add(plane)
+
+// const boxGeometry = new THREE.BoxBufferGeometry(1, 0.2, 1.5)
+// const boxMateral = new THREE.MeshStandardMaterial({ color: 0xff00ff })
+// const box = new THREE.Mesh(boxGeometry, boxMateral)
+// const boxAxesHelper = new THREE.AxesHelper(0.9)
+// box.add(boxAxesHelper)
+// scene.add(box)
+
+// const env = new THREE.HemisphereLight(0xffffff, 0x888888, 1.0)
+// scene.add(env)
 
 let resizeReduction = 0
 function resize () {
@@ -135,7 +146,8 @@ export default {
   data () {
     return {
       alpha: 0,
-      beta: 90
+      beta: 90,
+      gamma: 0
     }
   },
   mounted () {
@@ -154,6 +166,7 @@ export default {
     orient (e) {
       this.alpha = e.alpha
       this.beta = e.beta
+      this.gamma = e.gamma
     },
     render (time) {
       material.resolution.set(innerWidth, innerHeight)
@@ -166,15 +179,16 @@ export default {
       if (time % 2000 < 500 && colorLock) {
         colorLock = false
       }
-      // material.color = new THREE.Color(Math.random() * 0xffffff)
-      // camera.position.set(Math.sin(time / 6000) * 80, 2, Math.cos(time / 6000) * 80)
-      const y = -Math.cos(this.beta * deg) * 100
-      const xz = Math.sin(this.beta * deg) * 100
-      const x = Math.cos(this.alpha * deg) * xz
-      const z = -Math.sin(this.alpha * deg) * xz
-      camera.position.set(0, 2, 0)
-      camera.lookAt(x, y, z)
-      // camera.lookAt(80, 24, 0)
+      const rotateGamma = new THREE.Matrix4().makeRotationY(this.gamma * deg)
+      const rotateBeta = new THREE.Matrix4().makeRotationX(this.beta * deg).multiply(rotateGamma)
+      const rotateAlpha = new THREE.Matrix4().makeRotationZ(this.alpha * deg).multiply(rotateBeta)
+      const rotate = new THREE.Matrix4().makeRotationX(-90 * deg).multiply(rotateAlpha)
+      // const dir = new THREE.Vector3(0, -1, 0).applyMatrix4(rotateAlpha)
+      camera.position.set(0, 0, 0)
+      camera.setRotationFromMatrix(rotate)
+      // camera.lookAt(dir)
+      // box.setRotationFromMatrix(rotate)
+      // camera.lookAt(0, 0, 0)
       // renderer.render(scene, camera)
       composer.render(time)
       raf = requestAnimationFrame(this.render)

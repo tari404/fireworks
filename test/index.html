@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Device</title>
+  <style>
+    .info {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="info">
+    <div>alpha:<span id="alpha"></span></div>
+    <div>beta :<span id="beta"></span></div>
+    <div>gamma:<span id="gamma"></span></div>
+    <!-- <div>other:<span id="other"></span></div> -->
+    <div>rrate:<span id="other2"></span></div>
+  </div>
+  <div></div>
+</body>
+<script>
+const alpha = document.querySelector('#alpha')
+const beta = document.querySelector('#beta')
+const gamma = document.querySelector('#gamma')
+// const other = document.querySelector('#other')
+const other2 = document.querySelector('#other2')
+let time = 0
+window.ondeviceorientation = e => {
+  time++
+  alpha.innerHTML = (e.alpha).toFixed(0)
+  beta.innerHTML = e.beta.toFixed(0)
+  gamma.innerHTML = e.gamma.toFixed(0)
+  // other.innerHTML = (e.alpha + e.gamma).toFixed(0)
+  // other2.innerHTML = (e.beta + e.gamma).toFixed(0)
+  if (ws.readyState === ws.OPEN) {
+    ws.send([e.alpha, e.beta, e.gamma])
+  }
+}
+setInterval(() => {
+  other2.innerHTML = time
+  time = 0
+}, 1000)
+const ws = new WebSocket('ws://192.168.46.3:9000')
+</script>
+</html>
