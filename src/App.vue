@@ -8,9 +8,9 @@ import * as THREE from 'three'
 import { CopyMaterial, ShaderPass, EffectComposer, RenderPass } from 'postprocessing'
 // import OrbitControls from 'three-orbitcontrols'
 
-import LineGeometry from './lib/LineGeometry'
+import FireworkGeometry from './lib/FireworkGeometry'
 import LineMaterial from './lib/LineMaterial'
-import Line2 from './lib/Line'
+import Firework from './lib/Firework'
 
 window.THREE = THREE
 const deg = Math.PI / 180
@@ -27,9 +27,11 @@ renderer.setPixelRatio(window.devicePixelRatio)
 window.renderer = renderer
 
 const scene = new THREE.Scene()
+scene.fog = new THREE.FogExp2(0x03060c, 0.01)
+
 const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 1000)
-camera.position.set(0, 2, 0)
-camera.lookAt(1, 0, 0)
+camera.position.set(0, 0, 0)
+camera.lookAt(0, 0, -1)
 
 const composer = new EffectComposer(renderer)
 
@@ -43,103 +45,88 @@ const renderPass = new RenderPass(scene, camera)
 composer.addPass(renderPass)
 composer.addPass(copyPass)
 
-const geometry = new LineGeometry()
-
-function updateColor (geometry, h) {
-  const color = new THREE.Color()
-  color.setHSL(h, 1.0, 1.0) // Temporarily only use material color
-  const colors = []
-  for (let i = 0; i < 18; i++) {
-    colors.push(color.r, color.g, color.b)
-  }
-  geometry.setColors(colors)
-}
-updateColor(geometry, 0.81)
-
+const geometry = new FireworkGeometry(1)
 const material = new LineMaterial({
   // blending: THREE.AdditiveBlending,
-  color: 0xd900ff,
-  width: 2,
-  vertexColors: THREE.VertexColors
+  vertexColors: THREE.VertexColors,
+  depthTest: false,
+  transparent: true,
+  width: 2
 })
-const line = new Line2(geometry, material)
 
-window.material = material
+class FireworkObj {
+  constructor (geometry, material) {
+    this.geometry = geometry
+    this.material = material
+    this.mesh = new Firework(geometry, material)
 
-// const positions = []
-// const dire = new THREE.Vector3(Math.random() - 1, Math.random() - 1, Math.random() - 1)
-// for (let j = 0; j < 20; j++) {
-//   positions.push(
-//     dire.x * j,
-//     dire.y * j,
-//     dire.z * j
-//   )
-// }
-// line.geometry.setPositions(positions)
-// line.computeLineDistances()
-// scene.add(line)
+    this.mesh.computeLineDistances()
+    this.refresh()
+    this.resize()
+  }
 
-const raysCount = 60
-for (let k = 0; k < 20; k++) {
-  const r = Math.random() * Math.PI * 2
-  const x = Math.sin(r) * 100
-  const z = Math.cos(r) * 100
-  for (let i = 0; i < raysCount; i++) {
-    const positions = []
-    const dir = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize()
-    const speed = Math.random() * 0.7 + 0.5
-    for (let j = 0; j < 18; j++) {
-      positions.push(
-        x + dir.x * j * speed,
-        30 + dir.y * j * speed - j * j / 50,
-        z + dir.z * j * speed
-      )
+  update (time, core) {
+    if (time > this.birth + 1100) {
+      this.refresh(core)
+    } else if (time > this.birth) {
+      this.material.sqrtLifeTime = Math.sqrt((time - this.birth) / 1000)
     }
-    const lineCopy = line.clone()
-    lineCopy.geometry.setPositions(positions)
-    lineCopy.computeLineDistances()
-    scene.add(lineCopy)
+  }
+
+  resize () {
+    this.material.resolution.set(innerWidth, innerHeight)
+  }
+
+  refresh (core = 0) {
+    this.birth = Date.now() + Math.random() * 1000
+    const theta = (Math.random() - 0.5) * Math.PI + core
+    const distance = Math.random() * 60 + 50
+    this.geometry.updatePositions()
+    this.geometry.baseColor.set(new THREE.Color().setHSL(1 - Math.random() * 0.48, 1, 0.6))
+    this.geometry.updateColors()
+    this.mesh.position.set(
+      Math.cos(theta) * distance,
+      Math.random() * 30,
+      Math.sin(theta) * distance
+    )
   }
 }
+const fireworks = []
+for (let i = 0; i < 60; i++) {
+  const firework = new FireworkObj(geometry.clone(), material.clone())
+  scene.add(firework.mesh)
+  fireworks.push(firework)
+}
 
-const axesHelper = new THREE.AxesHelper(1)
-scene.add(axesHelper)
+// const axesHelper = new THREE.AxesHelper(1)
+// scene.add(axesHelper)
 
-// const dir = new THREE.Vector3(1, 2, 0)
-// dir.normalize()
-// const origin = new THREE.Vector3(0, 0, 0)
-// const length = 1
-// const hex = 0xffff00
-// const arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex)
-// scene.add(arrowHelper)
-
-const planeGeometry = new THREE.CircleGeometry(10, 32)
-const planeMateral = new THREE.MeshBasicMaterial({ color: 0xffffff })
+const planeGeometry = new THREE.CircleGeometry(8, 64)
+const planeMateral = new THREE.MeshBasicMaterial({ color: 0x1b2c3c })
 const plane = new THREE.Mesh(planeGeometry, planeMateral)
 plane.rotation.set(-Math.PI / 2, 0, 0)
 plane.position.setY(-2)
 scene.add(plane)
 
-// const boxGeometry = new THREE.BoxBufferGeometry(1, 0.2, 1.5)
-// const boxMateral = new THREE.MeshStandardMaterial({ color: 0xff00ff })
-// const box = new THREE.Mesh(boxGeometry, boxMateral)
-// const boxAxesHelper = new THREE.AxesHelper(0.9)
-// box.add(boxAxesHelper)
-// scene.add(box)
-
-// const env = new THREE.HemisphereLight(0xffffff, 0x888888, 1.0)
-// scene.add(env)
+const boxGeometry = new THREE.BoxGeometry(500, 500, 500)
+const boxMateral = new THREE.MeshBasicMaterial({
+  color: 0x03060c,
+  side: THREE.DoubleSide
+})
+const box = new THREE.Mesh(boxGeometry, boxMateral)
+scene.add(box)
 
 let resizeReduction = 0
 function resize () {
+  fireworks.forEach(firework => {
+    firework.resize()
+  })
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(innerWidth, innerHeight)
   composer.setSize(innerWidth, innerHeight)
   camera.aspect = innerWidth / innerHeight
   camera.updateProjectionMatrix()
 }
-
-let colorLock = false
 
 export default {
   name: 'App',
@@ -169,28 +156,35 @@ export default {
       this.gamma = e.gamma
     },
     render (time) {
-      material.resolution.set(innerWidth, innerHeight)
-      // material.sqrtLifeTime = 0.7
-      material.sqrtLifeTime = Math.sqrt(time % 2000 / 1000)
-      if (time % 2000 > 1700 && !colorLock) {
-        colorLock = true
-        material.color = new THREE.Color().setHSL(Math.random(), 1, 0.6)
-      }
-      if (time % 2000 < 500 && colorLock) {
-        colorLock = false
-      }
+      // firework.material.resolution.set(innerWidth, innerHeight)
+      // material.resolution.set(innerWidth, innerHeight)
+      // material.sqrtLifeTime = Math.sqrt(time % 2000 / 1000)
+      // if (time % 2000 > 1700 && !colorLock) {
+      //   colorLock = true
+      //   material.color = new THREE.Color().setHSL(Math.random(), 0.9, 1)
+      //   geometry.updatePositions()
+      // }
+      // if (time % 2000 < 500 && colorLock) {
+      //   colorLock = false
+      // }
       const rotateGamma = new THREE.Matrix4().makeRotationY(this.gamma * deg)
       const rotateBeta = new THREE.Matrix4().makeRotationX(this.beta * deg).multiply(rotateGamma)
       const rotateAlpha = new THREE.Matrix4().makeRotationZ(this.alpha * deg).multiply(rotateBeta)
       const rotate = new THREE.Matrix4().makeRotationX(-90 * deg).multiply(rotateAlpha)
-      // const dir = new THREE.Vector3(0, -1, 0).applyMatrix4(rotateAlpha)
+
+      const dir = new THREE.Vector3(0, 0, -1).applyMatrix4(rotate)
+      const thetaY = Math.atan2(dir.z, dir.x)
+
+      const now = Date.now()
+      fireworks.forEach(firework => {
+        firework.update(now, thetaY)
+      })
+
       camera.position.set(0, 0, 0)
       camera.setRotationFromMatrix(rotate)
-      // camera.lookAt(dir)
-      // box.setRotationFromMatrix(rotate)
-      // camera.lookAt(0, 0, 0)
-      // renderer.render(scene, camera)
-      composer.render(time)
+
+      // composer.render(time)
+      renderer.render(scene, camera)
       raf = requestAnimationFrame(this.render)
     }
   },

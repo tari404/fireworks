@@ -67,6 +67,10 @@ export default class LineMaterial extends THREE.ShaderMaterial {
 
   static isLineMaterial = true
 
+  clone () {
+    return new this.constructor().copy(this)
+  }
+
   copy (source) {
     THREE.ShaderMaterial.prototype.copy.call(this, source)
     this.color.copy(source.color)

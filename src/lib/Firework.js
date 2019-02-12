@@ -56,7 +56,7 @@ export default class FireWork extends THREE.Mesh {
   }
 
   clone () {
-    return new this.constructor(this.geometry.clone(), this.material).copy(this)
+    return new this.constructor(this.geometry.clone(), this.material.clone()).copy(this)
   }
 
   copy (source) {

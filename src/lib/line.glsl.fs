@@ -17,17 +17,17 @@ void main() {
 
   #include <clipping_planes_fragment>
 
-  if (uSqrtLifeTime < vLineDistance) {
+  if (uSqrtLifeTime < vLineDistance + vUv.x * vUv.x / 100.0) {
     discard;
   }
 
-  if (vUv.y > 1.0) {
-    float a = vUv.x;
-    float b = vUv.y - 1.0;
-    float len2 = a * a + b * b;
+  // if (vUv.y > 1.0) {
+  //   float a = vUv.x;
+  //   float b = vUv.y - 1.0;
+  //   float len2 = a * a + b * b;
 
-    if (len2 > 1.0) discard;
-  }
+  //   if (len2 > 1.0) discard;
+  // }
 
   float attenuation = uSqrtLifeTime - vLineDistance;
   float opacity = 2.5 * (1.0 - attenuation / uSqrtLifeTime) * (1.0 - uSqrtLifeTime);

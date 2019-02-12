@@ -10,7 +10,7 @@ export default class FireworkGeometry extends THREE.InstancedBufferGeometry {
     velocity = 5,
     amount = 32,
     segments = 10,
-    baseColor = 0xd900ff
+    baseColor = new THREE.Color().setHSL(Math.random(), 1, 0.6)
   ) {
     super()
 
@@ -19,8 +19,10 @@ export default class FireworkGeometry extends THREE.InstancedBufferGeometry {
     this.segments = segments
     this.baseColor = baseColor
 
-    const positions = [ -1, 2, 0, 1, 2, 0, -1, 1, 0, 1, 1, 0, -1, 0, 0, 1, 0, 0 ]
-    const uvs = [ -1, 2, 1, 2, -1, 1, 1, 1, -1, 0, 1, 0 ]
+    // const positions = [ -1, 2, 0, 1, 2, 0, -1, 1, 0, 1, 1, 0, -1, 0, 0, 1, 0, 0 ]
+    // const uvs = [ -1, 2, 1, 2, -1, 1, 1, 1, -1, 0, 1, 0 ]
+    const positions = [ -1, 1, 0, 1, 1, 0, -1, 1, 0, 1, 1, 0, -1, 0, 0, 1, 0, 0 ]
+    const uvs = [ -1, 1, 1, 1, -1, 1, 1, 1, -1, 0, 1, 0 ]
     const index = [ 0, 2, 1, 2, 3, 1, 2, 4, 3, 4, 5, 3 ]
 
     this.setIndex(index)
@@ -77,11 +79,16 @@ export default class FireworkGeometry extends THREE.InstancedBufferGeometry {
 
   updateColors () {
     const length = this.amount * this.segments
-    const colors = new Float32Array(6 * length)
+    const colors = []
 
-    colors.fill(this.baseColor)
+    for (let i = 0; i < length; i++) {
+      colors.push(this.baseColor.r, this.baseColor.g, this.baseColor.b)
+      colors.push(this.baseColor.r, this.baseColor.g, this.baseColor.b)
+    }
 
-    var instanceColorBuffer = new THREE.InstancedInterleavedBuffer(colors, 6, 1) // rgb, rgb
+    const buffer = new Float32Array(colors)
+
+    var instanceColorBuffer = new THREE.InstancedInterleavedBuffer(buffer, 6, 1) // rgb, rgb
 
     this.addAttribute('instanceColorStart', new THREE.InterleavedBufferAttribute(instanceColorBuffer, 3, 0)) // rgb
     this.addAttribute('instanceColorEnd', new THREE.InterleavedBufferAttribute(instanceColorBuffer, 3, 3)) // rgb
@@ -168,7 +175,12 @@ export default class FireworkGeometry extends THREE.InstancedBufferGeometry {
   }
 
   clone () {
-    // todo
+    return new this.constructor(
+      this.velocity,
+      this.amount,
+      this.segments,
+      this.baseColor
+    )
   }
 
   copy (source) {
