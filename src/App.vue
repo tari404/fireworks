@@ -59,7 +59,7 @@ updateColor(geometry, 0.81)
 const material = new LineMaterial({
   // blending: THREE.AdditiveBlending,
   color: 0xd900ff,
-  width: 4,
+  width: 2,
   vertexColors: THREE.VertexColors
 })
 const line = new Line2(geometry, material)
@@ -170,11 +170,11 @@ export default {
     },
     render (time) {
       material.resolution.set(innerWidth, innerHeight)
-      material.sqrtLifeTime = 0.7
-      // material.sqrtLifeTime = Math.sqrt(time % 2000 / 1500)
+      // material.sqrtLifeTime = 0.7
+      material.sqrtLifeTime = Math.sqrt(time % 2000 / 1000)
       if (time % 2000 > 1700 && !colorLock) {
         colorLock = true
-        // material.color = new THREE.Color().setHSL(Math.random(), 1, 0.6)
+        material.color = new THREE.Color().setHSL(Math.random(), 1, 0.6)
       }
       if (time % 2000 < 500 && colorLock) {
         colorLock = false
